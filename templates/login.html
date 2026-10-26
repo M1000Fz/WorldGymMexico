@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal de Socios - World Gym Mexico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-image: linear-gradient(rgba(10, 10, 10, 0.8), rgba(10, 10, 10, 0.95)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover; background-position: center; color: #e0e0e0; height: 100vh;
+        }
+        .login-box {
+            background-color: rgba(15, 15, 15, 0.95); border: 1px solid #ff003c;
+            box-shadow: 0 0 25px rgba(255, 0, 60, 0.2); padding: 40px; width: 100%; max-width: 400px;
+        }
+        .form-control { background-color: #111; border: 1px solid #444; color: #fff; border-radius: 0; }
+        .form-control:focus { background-color: #000; border-color: #ff003c; box-shadow: 0 0 8px rgba(255, 0, 60, 0.5); color: #fff; }
+        .btn-custom-red { background-color: #ff003c; color: #000; border: 1px solid #ff003c; border-radius: 0; text-transform: uppercase; font-weight: bold; transition: all 0.3s; width: 100%; }
+        .btn-custom-red:hover { background-color: #000; color: #ff003c; box-shadow: 0 0 15px #ff003c; }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center">
+
+<div class="login-box text-center">
+    <h2 class="text-danger fw-bold mb-1" style="letter-spacing: 2px;"><i class="fas fa-dumbbell"></i> WORLD GYM</h2>
+    <p class="text-secondary mb-4" style="font-size: 0.9em; letter-spacing: 1px;">ACTIVACIÓN Y PORTAL DE SOCIOS</p>
+    
+    <form action="/" method="POST">
+        <div class="mb-3 text-start">
+            <label class="text-uppercase text-secondary" style="font-size: 0.8em;">Correo Electrónico de Registro:</label>
+            <input type="text" name="usuario_correo" class="form-control" placeholder="ejemplo@correo.com" required>
+        </div>
+        <div class="mb-4 text-start">
+            <label class="text-uppercase text-secondary" style="font-size: 0.8em;">Código de Acceso (Entregado en recepción):</label>
+            <input type="password" name="password_codigo" class="form-control" placeholder="EJ: TIGER-MEN" required>
+        </div>
+        <button type="submit" class="btn btn-custom-red py-2">Activar / Ingresar a mi Portal</button>
+    </form>
+    
+    <div class="mt-4 pt-3 border-top border-dark text-secondary" style="font-size: 0.8em;">
+        Ingresa los datos que te proporcionamos al inscribirte para visualizar el estatus de tu membresía.
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <script>
+      {% for category, message in messages %}
+        Swal.fire({ icon: '{{ "success" if category == "success" else "error" }}', title: 'SISTEMA', text: '{{ message }}', background: '#111', color: '#e0e0e0', confirmButtonColor: '#ff003c' });
+      {% endfor %}
+    </script>
+  {% endif %}
+{% endwith %}
+
+</body>
+</html>

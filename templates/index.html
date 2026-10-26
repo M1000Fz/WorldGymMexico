@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>World Gym Mexico - Gestión de Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para el Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-image: linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.95)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: #e0e0e0;
+        }
+        .titulo-gym { color: #ff003c; text-transform: uppercase; letter-spacing: 4px; font-weight: 700; text-shadow: 2px 2px 0px #000; border-bottom: 2px solid #ff003c; display: inline-block; padding-bottom: 10px; }
+        .card { background-color: rgba(15, 15, 15, 0.9); border: 1px solid #ff003c; border-radius: 0; box-shadow: 0 0 20px rgba(255, 0, 60, 0.15); }
+        .card-header { background-color: #ff003c !important; color: #000 !important; text-transform: uppercase; font-weight: bold; letter-spacing: 2px; border-radius: 0; border-bottom: none; }
+        .nav-tabs .nav-link { color: #ff003c; background-color: rgba(0, 0, 0, 0.6); border: 1px solid #ff003c; border-radius: 0; margin-right: 5px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
+        .nav-tabs .nav-link:hover { border-color: #ff003c; background-color: rgba(255, 0, 60, 0.1); }
+        .nav-tabs .nav-link.active { background-color: #ff003c; color: #000; border-color: #ff003c; font-weight: bold; }
+        .table { color: #ccc; margin-bottom: 0; }
+        .table th { background-color: #0a0a0a; color: #ff003c; border-bottom: 2px solid #ff003c; text-transform: uppercase; letter-spacing: 1px; }
+        .table td { background-color: rgba(20, 20, 20, 0.6); border-bottom: 1px solid #333; vertical-align: middle; }
+        .table-striped>tbody>tr:nth-of-type(odd)>td { background-color: rgba(30, 30, 30, 0.8); color: #fff; }
+        .badge-membresia { background-color: transparent; border: 1px solid #ff003c; color: #ff003c; border-radius: 0; padding: 5px 10px; }
+        label { color: #999; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; margin-bottom: 5px; }
+        .form-control, .form-select { background-color: #111; border: 1px solid #444; color: #fff; border-radius: 0; }
+        .form-control:focus, .form-select:focus { background-color: #000; border-color: #ff003c; box-shadow: 0 0 8px rgba(255, 0, 60, 0.5); color: #fff; }
+        .btn-custom-red { background-color: #ff003c; color: #000; border: 1px solid #ff003c; border-radius: 0; text-transform: uppercase; font-weight: bold; transition: all 0.3s; }
+        .btn-custom-red:hover { background-color: #000; color: #ff003c; box-shadow: 0 0 15px #ff003c; }
+        .btn-custom-dark { background-color: transparent; color: #ff003c; border: 1px solid #ff003c; border-radius: 0; text-transform: uppercase; transition: all 0.3s; }
+        .btn-custom-dark:hover { background-color: #ff003c; color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h2 class="titulo-gym"><i class="fas fa-dumbbell"></i> WORLD GYM MEXICO</h2>
+        <!-- BOTONES DE ADMINISTRACIÓN Y EXPORTACIÓN -->
+        <div class="mt-3">
+            <a href="/exportar" class="btn btn-success btn-sm rounded-0 border-0 me-2"><i class="fas fa-file-excel"></i> Exportar Padrón CSV</a>
+            <a href="/notificar_vencimientos" class="btn btn-warning btn-sm rounded-0 border-0 text-dark fw-bold me-2"><i class="fas fa-envelope"></i> Enviar Alertas de Pago</a>
+            <a href="/logout" class="btn btn-outline-danger btn-sm rounded-0"><i class="fas fa-power-off"></i> Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <!-- Navegación de Pestañas -->
+    <ul class="nav nav-tabs mb-4 border-0" id="misPestanas" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lista-tab" data-bs-toggle="tab" data-bs-target="#lista" type="button" role="tab"><i class="fas fa-server"></i> Base de Datos</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="dash-tab" data-bs-toggle="tab" data-bs-target="#dash" type="button" role="tab"><i class="fas fa-chart-pie"></i> Dashboard</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab"><i class="fas fa-user-plus"></i> Alta de Cliente</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="misPestanasContent">
+        
+        <!-- PESTAÑA 1: LISTA DE CLIENTES -->
+        <div class="tab-pane fade show active" id="lista" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Directorio Activo</span>
+                    <div class="input-group w-25">
+                        <span class="input-group-text bg-dark border-dark text-danger"><i class="fas fa-search"></i></span>
+                        <input type="text" id="buscador" class="form-control form-control-sm border-dark" placeholder="BUSCAR..." onkeyup="filtrarTabla()">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="tablaClientes">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Plan</th>
+                                    <th>Estatus de Acceso</th>
+                                    <th class="text-center">Operaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente in clientes %}
+                                <tr>
+                                    <td class="fw-bold text-white">{{ cliente[0] }}</td>
+                                    <td>{{ cliente[1] }} {{ cliente[2] }}</td>
+                                    <td>{{ cliente[3] }}</td>
+                                    <td><span class="badge badge-membresia">{{ cliente[5] }}</span></td>
+                                    <td>
+                                        <!-- Lógica Visual del Tiempo Restante -->
+                                        {% if cliente[6] == None %}
+                                            <span class="badge bg-secondary text-white">Sin Registro</span>
+                                        {% elif cliente[6] > 1000 %}
+                                            <span class="badge bg-warning text-dark border border-warning"><i class="fas fa-crown"></i> VIP Ilimitado</span>
+                                        {% elif cliente[6] <= 0 %}
+                                            <span class="badge bg-danger text-white border border-danger"><i class="fas fa-ban"></i> Membresía Vencida</span>
+                                        {% elif cliente[6] <= 5 %}
+                                            <span class="badge bg-danger text-white border border-danger"><i class="fas fa-clock"></i> Quedan {{ cliente[6] }} días</span>
+                                        {% else %}
+                                            <span class="badge bg-success text-white border border-success"><i class="fas fa-check-circle"></i> Quedan {{ cliente[6] }} días</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="/editar/{{ cliente[0] }}" class="btn btn-custom-dark btn-sm me-1"><i class="fas fa-pen-to-square"></i></a>
+                                        <button onclick="confirmarEliminacion({{ cliente[0] }})" class="btn btn-custom-red btn-sm"><i class="fas fa-skull"></i></button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: DASHBOARD ESTADÍSTICO -->
+        <div class="tab-pane fade" id="dash" role="tabpanel">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-chart-line"></i> Estadísticas Generales</div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-md-5 text-center mt-3 mb-4">
+                            <h5 class="text-danger fw-bold mb-4 border-bottom border-danger pb-2">DISTRIBUCIÓN DE MEMBRESÍAS</h5>
+                            <!-- Contenedor del gráfico -->
+                            <canvas id="graficoMembresias"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: REGISTRO -->
+        <div class="tab-pane fade" id="registro" role="tabpanel">
+            <div class="card">
+                <div class="card-header">Formulario de Ingreso</div>
+                <div class="card-body p-4">
+                    <form action="/agregar" method="POST" class="row g-4">
+                        <div class="col-md-6">
+                            <label>Nombre:</label>
+                            <input type="text" name="nombre" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Apellido:</label>
+                            <input type="text" name="apellido" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Email:</label>
+                            <input type="email" name="email" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Teléfono:</label>
+                            <input type="text" name="telefono" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Nivel de Membresía:</label>
+                            <select name="membresia" class="form-select">
+                                <option value="Mensual">Mensual</option>
+                                <option value="Trimestral">Trimestral</option>
+                                <option value="Anual">Anual</option>
+                                <option value="VIP">VIP</option>
+                            </select>
+                        </div>
+                        <div class="col-12 text-end mt-5">
+                            <button type="submit" class="btn btn-custom-red px-5 py-2"><i class="fas fa-bolt"></i> Registrar en Sistema</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Renderizado del Gráfico de Chart.js -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('graficoMembresias').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mensual', 'Trimestral', 'Anual', 'VIP'],
+                datasets: [{
+                    data: [{{ stats['Mensual'] }}, {{ stats['Trimestral'] }}, {{ stats['Anual'] }}, {{ stats['VIP'] }}],
+                    backgroundColor: ['#ff003c', '#8b0000', '#550000', '#ffd700'],
+                    borderColor: '#111',
+                    borderWidth: 3,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#e0e0e0', font: { family: 'Oswald', size: 14 } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    function filtrarTabla() {
+        let input = document.getElementById("buscador").value.toLowerCase();
+        let filas = document.querySelectorAll("#tablaClientes tbody tr");
+        filas.forEach(fila => {
+            let textoFila = fila.innerText.toLowerCase();
+            fila.style.display = textoFila.includes(input) ? "" : "none";
+        });
+    }
+
+    function confirmarEliminacion(id) {
+        Swal.fire({
+            title: '¿PURGAR CLIENTE?',
+            text: "Esta acción destruirá el registro para siempre.",
+            icon: 'warning',
+            background: '#111',
+            color: '#e0e0e0',
+            showCancelButton: true,
+            confirmButtonColor: '#ff003c',
+            cancelButtonColor: '#333',
+            confirmButtonText: '<i class="fas fa-skull"></i> Proceder',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/borrar/" + id;
+            }
+        });
+    }
+</script>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <script>
+      {% for category, message in messages %}
+        Swal.fire({
+          icon: '{{ "success" if category == "success" else "error" }}',
+          title: '{{ "OPERACIÓN EXITOSA" if category == "success" else "FALLO EN SISTEMA" }}',
+          text: '{{ message }}',
+          background: '#111',
+          color: '#e0e0e0',
+          confirmButtonColor: '#ff003c'
+        });
+      {% endfor %}
+    </script>
+  {% endif %}
+{% endwith %}
+
+</body>
+</html>
